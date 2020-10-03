@@ -36,7 +36,7 @@ void stats_task(void *arg)
 	//Print real time stats periodically
 	for(;  ;)
 	{
-		vTaskDelay(pdMS_TO_TICKS(1000));
+		vTaskDelay(pdMS_TO_TICKS(500));
 
 
 		if (print_real_time_stats(STATS_TICKS) == ESP_OK)

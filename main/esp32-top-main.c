@@ -12,7 +12,8 @@
 #include "freertos/task.h"
 #include "esp_system.h"
 #include "esp_spi_flash.h"
-#include "esp_task_wdt.h"
+//#include "esp_task_wdt.h"
+#include "esp32_htop.h"
 #include <math.h>
 
 
@@ -23,9 +24,6 @@
 #ifdef CONFIG_IDF_TARGET_ESP32S2BETA
 #define CHIP_NAME "ESP32-S2 Beta"
 #endif
-
-#include "esp32_htop.h"
-
 
 #define PRO_CPU	0
 #define APP_CPU	1
@@ -38,8 +36,7 @@
 #define PI 3.14159265
 
 void workload_task(void *arg){
-    for (int i = 9999999992; i >= 0; i--) {
-        //printf("Restarting in %d seconds...\n", i);
+    for (int i = 299999999; i >= 0; i--) {
 		if(i%10000 == 0){
 			vTaskDelay(15 / portTICK_PERIOD_MS);
 		}
@@ -48,12 +45,32 @@ void workload_task(void *arg){
 		x = 45.0;
 		val = PI / 180;
 		ret = sin(x*val);
+		ret *= ret;
 		// esp_task_wdt_reset();
    
     }
-    printf("Restarting now.\n");
-    fflush(stdout);
-    esp_restart();
+    //printf("Restarting now.\n");
+    //fflush(stdout);
+    //esp_restart();
+}
+
+/*
+ *  	idleloop1()
+ */
+void idleloop1(void * parameter)
+{
+	for (;;)
+	{
+		//Consume CPU cycles
+		for(uint32_t i = 0 ; i < SPIN_ITER ; i++)
+		{
+			__asm__ __volatile__("NOP");
+		}
+
+		uint8_t t = rand() % 200;
+
+		vTaskDelay(pdMS_TO_TICKS(t + 10));
+	}
 }
 
 /*
@@ -84,17 +101,21 @@ void app_main(void)
             (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
 
     // deactivate WDT for IDLE tasks
-    for(int i = 0; i < portNUM_PROCESSORS; i++){
+    //for(int i = 0; i < portNUM_PROCESSORS; i++){
 		//unsubscribe idle task
 		// CHECK_ERROR_CODE(esp_task_wdt_delete(xTaskGetIdleTaskHandleForCPU(i)), ESP_OK);     //Unsubscribe Idle Task from TWDT
 		// CHECK_ERROR_CODE(esp_task_wdt_status(xTaskGetIdleTaskHandleForCPU(i)), ESP_ERR_NOT_FOUND);      //Confirm Idle task has unsubscribed
-	}
-	
-	//Create and start stats task
-	xTaskCreatePinnedToCore(stats_task, "stats", 4096, (void *) DETAIL_LEVEL, STATS_TASK_PRIO, NULL, tskNO_AFFINITY);
+	//}
 	
 	TaskHandle_t taskHandle;
-	//Create and start worker task
+	
+	//Create and start stats task
+	xTaskCreatePinnedToCore(stats_task, "stats", 4096, (void *) DETAIL_LEVEL, STATS_TASK_PRIO, &taskHandle, tskNO_AFFINITY);
+
+	//Spin up idle Task
+	xTaskCreatePinnedToCore(idleloop1, "idleloop1", 2048, NULL, 10, &taskHandle, tskNO_AFFINITY);
+	
+	//Spin up worker task
 	xTaskCreatePinnedToCore(workload_task, "workload_task1", 4096, (void *) DETAIL_LEVEL, 5, &taskHandle, tskNO_AFFINITY);
 	xTaskCreatePinnedToCore(workload_task, "workload_task2", 4096, (void *) DETAIL_LEVEL, 5, &taskHandle, tskNO_AFFINITY);
 	xTaskCreatePinnedToCore(workload_task, "workload_task3", 4096, (void *) DETAIL_LEVEL, 5, &taskHandle, tskNO_AFFINITY);
