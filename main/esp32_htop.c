@@ -76,24 +76,26 @@ void stats_task(void *arg)
 			for (uint8_t j = 0; j < task_total; j++)
 			{
 
-				uint32_t cpu_used = 100 - task_order_list[j].percentage_time;
-				uint8_t bars = ((int)(((float)cpu_used / 100) * 40)) + 1;
+				// uint32_t cpu_used = 100 - task_order_list[j].percentage_time;
+				// uint8_t bars = ((int)(((float)cpu_used / 100) * 40)) + 1;
+				uint32_t cpu_used = task_order_list[j].percentage_time;
+				uint8_t bars = ((int)(((float)task_order_list[j].percentage_time / 100) * 40)) + 1;
 
 
 				// Rename IDLE0 & IDLE1 to PRO & App cpu's These are the 2 cores.
-				if(strcmp(task_order_list[j].task_name, "IDLE0") == 0)
-				{
-					strcpy(task_order_list[j].task_name, "CPU 0 (Pro)");
-				}
-				else if(strcmp(task_order_list[j].task_name, "IDLE1") == 0)
-				{
-					strcpy(task_order_list[j].task_name, "CPU 1 (App)");
-				}
-				else
-				{
-					cpu_used = task_order_list[j].percentage_time;
-					bars = ((int)(((float)task_order_list[j].percentage_time / 100) * 40)) + 1;
-				}
+				// if(strcmp(task_order_list[j].task_name, "IDLE0") == 0)
+				// {
+				// 	strcpy(task_order_list[j].task_name, "CPU 0 (Pro)");
+				// }
+				// else if(strcmp(task_order_list[j].task_name, "IDLE1") == 0)
+				// {
+				// 	strcpy(task_order_list[j].task_name, "CPU 1 (App)");
+				// }
+				// else
+				// {
+				// 	cpu_used = task_order_list[j].percentage_time;
+				// 	bars = ((int)(((float)task_order_list[j].percentage_time / 100) * 40)) + 1;
+				// }
 
 
 				// Lets make names all evenly spaced.

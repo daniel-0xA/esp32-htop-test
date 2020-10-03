@@ -113,7 +113,7 @@ void app_main(void)
 	xTaskCreatePinnedToCore(stats_task, "stats", 4096, (void *) DETAIL_LEVEL, STATS_TASK_PRIO, &taskHandle, tskNO_AFFINITY);
 
 	//Spin up idle Task
-	xTaskCreatePinnedToCore(idleloop1, "idleloop1", 2048, NULL, 10, &taskHandle, tskNO_AFFINITY);
+	xTaskCreatePinnedToCore(idleloop1, "idleloop1", 2048, NULL, 5, &taskHandle, tskNO_AFFINITY);
 	
 	//Spin up worker task
 	xTaskCreatePinnedToCore(workload_task, "workload_task1", 4096, (void *) DETAIL_LEVEL, 5, &taskHandle, tskNO_AFFINITY);
